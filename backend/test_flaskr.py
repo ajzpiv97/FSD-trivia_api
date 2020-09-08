@@ -106,6 +106,42 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(question_dict['question'], 'new question')
         self.assertTrue(data['questions'])
 
+    def test_422_failed_to_add_question(self):
+        new_question = {
+            'question': 'new question',
+            'answer': 'new answer',
+            'difficulty': 1,
+        }
+        res = self.client().post('/questions', json=new_question)
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 422)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'unprocessable')
+
+    def test_search_questions(self):
+        res = self.client().post('/questions/search', json={'search': 'new'})
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(data['questions'])
+        self.assertEqual(data['total_questions'], 10)
+
+    def test_422_not_given_search_term(self):
+        res = self.client().post('/questions/search')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 422)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'unprocessable')
+
+    def test_404_not_found_search_term(self):
+        res = self.client().post('/questions/search', json={'searchTerm': 'vfd'})
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'resource not found')
+
 
 # Make the tests conveniently executable
 if __name__ == "__main__":
