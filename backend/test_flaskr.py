@@ -100,9 +100,10 @@ class TriviaTestCase(unittest.TestCase):
         data = json.loads(res.data)
 
         add_question = Question.query.filter(Question.question == new_question['question'])
+        question_dict = {'question': question.question for question in add_question}
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data["success"], True)
-        self.assertEqual(data['created'], add_question.id)
+        self.assertEqual(question_dict['question'], 'new question')
         self.assertTrue(data['questions'])
 
 
