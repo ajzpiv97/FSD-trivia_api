@@ -127,7 +127,6 @@ def create_app(test_config=None):
             db.session.rollback()
             abort(422)
 
-
     '''
   @TODO: 
   Create an endpoint to POST a new question, 
@@ -144,6 +143,7 @@ def create_app(test_config=None):
         body = request.get_json()
 
         if not ('question' in body and 'answer' in body and 'difficulty' in body and 'category' in body):
+            print(body)
             abort(422)
 
         new_question = body.get('question')
@@ -180,6 +180,39 @@ def create_app(test_config=None):
   Try using the word "title" to start. 
   '''
 
+    @app.route('/questions/search', methods=['POST'])
+    def search_question():
+        search = ''
+
+        try:
+            body = request.get_json()
+            search = body.get('searchTerm', None)
+
+            if search is None or '':
+                abort(422)
+
+        except (AttributeError, TypeError):
+            abort(422)
+
+        try:
+            if search:
+                selection = Question.query.order_by(Question.id) \
+                    .filter(Question.question.ilike('%{}%'.format(search)))
+
+                questions = [question.format() for question in selection]
+
+                if len(questions) == 0:
+                    abort(404)
+
+                return jsonify({
+                    'success': True,
+                    'questions': questions,
+                    'total_questions': len(questions),
+                })
+
+        except (AttributeError, TypeError):
+            abort(404)
+
     '''
   @TODO: 
   Create a GET endpoint to get questions based on category. 
@@ -188,6 +221,8 @@ def create_app(test_config=None):
   categories in the left column will cause only questions of that 
   category to be shown. 
   '''
+
+
 
     '''
   @TODO: 
