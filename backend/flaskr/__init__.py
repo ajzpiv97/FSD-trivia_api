@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 import random
 
-from .models import setup_db, Question, Category, db
+from ..models import setup_db, Question, Category, db
 
 QUESTIONS_PER_PAGE = 10
 
@@ -22,7 +22,7 @@ def paginate_questions(requests, selection):
 
 def create_app(test_config=None):
     # create and configure the app
-    app = Flask(__name__)
+    app = Flask(__name__, instance_relative_config=True)
     '''
   @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
   '''
@@ -75,12 +75,12 @@ def create_app(test_config=None):
   you should see questions and categories generated,
   ten questions per page and pagination at the bottom of the screen for three pages.
   Clicking on the page numbers should update the questions. 
-  
-  
+
+
   '''
 
-    @app.route('/questions')
-    def retrieve_questions():
+    @app.route('/questions', methods=['GET'])
+    def get_questions_paginated():
         selection = Question.query.order_by(Question.id).all()
         current_questions = paginate_questions(request, selection)
 
@@ -142,8 +142,10 @@ def create_app(test_config=None):
     def post_questions():
         body = request.get_json()
 
+        if body is None:
+            return jsonify({'body': body})
+
         if not ('question' in body and 'answer' in body and 'difficulty' in body and 'category' in body):
-            print(body)
             abort(422)
 
         new_question = body.get('question')
@@ -187,7 +189,6 @@ def create_app(test_config=None):
         try:
             body = request.get_json()
             search = body.get('searchTerm', None)
-
             if search is None or '':
                 abort(422)
 
@@ -230,7 +231,6 @@ def create_app(test_config=None):
 
         selection = Question.query.filter_by(category=category.id).all()
         paginated = paginate_questions(request, selection)
-        print(len(selection))
 
         return jsonify({
             'success': True,
@@ -250,6 +250,7 @@ def create_app(test_config=None):
   one question at a time is displayed, the user is allowed to answer
   and shown whether they were correct or not. 
   '''
+
     @app.route('/quizzes', methods=['POST'])
     def post_quizzes():
         try:
@@ -271,7 +272,7 @@ def create_app(test_config=None):
                     category=category['id']).filter(Question.id.notin_(previous_questions)).all()
 
             new_random_question = available_questions[random.randrange(
-             0, len(available_questions))].format() if len(available_questions) > 0 else None
+                0, len(available_questions))].format() if len(available_questions) > 0 else None
 
             return jsonify({
                 'success': True,
