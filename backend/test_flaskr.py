@@ -2,7 +2,7 @@ import unittest
 from flask_sqlalchemy import SQLAlchemy
 import json
 from .flaskr import create_app
-from backend.flaskr.models import setup_db, Question, Category
+from .models import setup_db, Question
 
 
 class TriviaTestCase(unittest.TestCase):
@@ -125,7 +125,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
         self.assertTrue(data['questions'])
-        self.assertEqual(data['total_questions'], 12)
+        self.assertEqual(data['total_questions'], 14)
 
     def test_422_not_given_search_term(self):
         res = self.client().post('/questions/search')
