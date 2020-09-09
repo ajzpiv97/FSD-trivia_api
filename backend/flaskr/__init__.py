@@ -140,10 +140,11 @@ def create_app(test_config=None):
 
     @app.route('/questions', methods=['POST'])
     def post_questions():
+
         body = request.get_json()
 
         if body is None:
-            return jsonify({'body': body})
+            abort(422)
 
         if not ('question' in body and 'answer' in body and 'difficulty' in body and 'category' in body):
             abort(422)
@@ -165,7 +166,7 @@ def create_app(test_config=None):
                 'success': True,
                 'created': question.id,
                 'questions': current_questions,
-                'total_books': len(Question.query.all())
+                'total_questions': len(Question.query.all())
             })
 
         except AttributeError:
@@ -253,6 +254,7 @@ def create_app(test_config=None):
 
     @app.route('/quizzes', methods=['POST'])
     def post_quizzes():
+
         try:
 
             body = request.get_json()
@@ -269,7 +271,7 @@ def create_app(test_config=None):
 
             else:
                 available_questions = Question.query.filter_by(
-                    category=category['id']).filter(Question.id.notin_(previous_questions)).all()
+                    category=category['type']).filter(Question.id.notin_(previous_questions)).all()
 
             new_random_question = available_questions[random.randrange(
                 0, len(available_questions))].format() if len(available_questions) > 0 else None
