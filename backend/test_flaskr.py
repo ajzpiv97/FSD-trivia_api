@@ -119,13 +119,13 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['message'], 'unprocessable')
 
     def test_search_questions(self):
-        res = self.client().post('/questions/search', json={'search': 'new'})
+        res = self.client().post('/questions/search', json={'searchTerm': 'new'})
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
         self.assertTrue(data['questions'])
-        self.assertEqual(data['total_questions'], 10)
+        self.assertEqual(data['total_questions'], 12)
 
     def test_422_not_given_search_term(self):
         res = self.client().post('/questions/search')
@@ -141,7 +141,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 404)
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'resource not found')
-        
+
     def test_get_question_based_on_category(self):
         res = self.client().get('/categories/4/questions')
         data = json.loads(res.data)
@@ -157,6 +157,25 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 404)
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'resource not found')
+
+    def test_quizzes(self):
+        new_quiz_round = {'previous_questions': [],
+                          'quiz_category': {'type': 'click', 'id': 9}}
+
+        res = self.client().post('/quizzes', json=new_quiz_round)
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+
+    def test_422_failed_quiz(self):
+        new_quiz_round = {'previous_questions': [], 'quiz_category': {}}
+        res = self.client().post('/quizzes', json=new_quiz_round)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 422)
+        self.assertEqual(data["success"], False)
+        self.assertEqual(data["message"], "unprocessable")
+
 
 # Make the tests conveniently executable
 if __name__ == "__main__":
